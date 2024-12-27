@@ -1,3 +1,5 @@
+data "aws_availability_zones" "available" {}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
@@ -30,6 +32,14 @@ module "k8s" {
   instance_types     = ["t3.small"]
   vpc_id             = module.vpc.vpc_id
   private_subnets    = module.vpc.private_subnets
-  certificate_arn    = "TO_COMPLETE"
+  certificate_arn    = aws_acm_certificate.main.arn
   tags               = local.tags
+}
+
+module "app" {
+  source = "./app"
+  name   = var.project_name
+  image  = "nginx:1.27.3"
+  host   = local.host
+  tags   = local.tags
 }
